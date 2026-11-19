@@ -1,19 +1,34 @@
-# Penpot PSD Exporter — prototype
+# Penpot PSD Exporter — experimental beta
 
-This is an early Penpot plugin prototype, **not yet a PSD converter**.
+This repository implements a **browser-side PSD exporter** for a selected Penpot board.
 
-## What works
-- Reads a single selected board and its descendants
-- Extracts shape positions, dimensions, fills, strokes, corner radii, text metadata and groups
-- Downloads the resulting data as JSON
+## Supported experimentally
+- One selected board
+- Editable Photoshop vector shapes for solid-color rectangles, rounded rectangles and ellipses (using ag-psd vectorFill, vectorMask, vectorOrigination)
+- Editable Photoshop text layers (using ag-psd text descriptors)
+- Layer groups and nested hierarchy
+- 1x, 2x, 3x scale
+- Basic PSD read-back validation before download
 
-## Not yet implemented
-- Writing PSD files
-- Photoshop-editable vector shapes, corner radius and text
-- Accurate gradients, images, masks, effects and typography
+## Known limitations
+- Not yet tested by opening output in Adobe Photoshop.
+- Fonts may substitute or shift; rich text styles and layout are not preserved.
+- Image fills, gradients, strokes, masks, shadows, paths and component features are not implemented and may be skipped.
+- Vector live shape parameters require real Photoshop verification.
+- Uses ag-psd from esm.sh; an internet connection is required.
+- Not production ready.
 
 ## Install
-Host manifest.json, plugin.js and index.html together via HTTPS and install the manifest URL through Penpot Plugin Manager.
+Enable GitHub Pages on the main branch at repository root. Then install:
+https://yesung9256.github.io/psd-exporter/manifest.json
+in Penpot's Plugin Manager.
 
-## Next milestone
-Implement and validate Photoshop-editable rectangle and text layers before claiming PSD support.
+## Development
+1. Select a board in Penpot.
+2. Launch plugin and click Export editable PSD.
+3. Open the downloaded file in Photoshop.
+4. Verify shape color, radius and text remain editable.
+5. Report failures for the next iteration.
+
+The plugin uses ag-psd. Source documentation:
+https://github.com/Agamnentzar/ag-psd/blob/master/README_PSD.md
