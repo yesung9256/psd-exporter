@@ -24,8 +24,9 @@ window.addEventListener("message",e=>{
   const blob=new Blob([result.bytes],{type:"image/vnd.adobe.photoshop"});
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download=(m.data.board.name||"board").replace(/[^\w가-힣-]/g,"_")+".psd";
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  a.textContent="PSD 다운로드";a.style.cssText="display:block;margin-top:10px;color:#145f53";
+  document.querySelector("#download-link")?.remove();a.id="download-link";
+  document.body.appendChild(a);a.click();
   status.textContent="PSD 생성 완료 (내부 파싱 검증)\n"+(result.warnings.length?"주의: "+result.warnings.join("; "):"단색 도형/텍스트 변환 시도 완료");
  }catch(err){status.textContent="변환 실패: "+String(err.message||err);}
  finally{button.disabled=false;}
