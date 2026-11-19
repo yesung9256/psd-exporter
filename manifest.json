@@ -1,9 +1,10 @@
 {
   "name": "Penpot PSD Exporter Prototype",
   "description": "Export selected board structure to JSON (PSD conversion not yet implemented)",
-  "version": "0.1.0",
+  "version": 2,
   "code": "plugin.js",
   "permissions": [
-    "content:read"
+    "content:read",
+    "allow:downloads"
   ]
 }
