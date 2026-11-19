@@ -1,1 +1,33 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><title>PSD Exporter Prototype</title><style>body{font:14px system-ui;padding:20px;color:#222}button{width:100%;padding:12px;border:0;border-radius:8px;background:#242424;color:white;font-weight:bold}p,small{line-height:1.6;color:#666}</style><h2>PSD Exporter</h2><p>Penpot에서 프레임 하나를 선택하세요.</p><button id="export">프레임 데이터 추출</button><p id="status"></p><small>현재 버전은 JSON만 지원합니다. 편집 가능한 PSD 생성은 아직 구현되지 않았습니다.</small><script>document.querySelector('#export').onclick=()=>parent.postMessage({type:'export'},'*');window.addEventListener('message',e=>{const m=e.data;if(m?.type==='error')document.querySelector('#status').textContent=m.message;if(m?.type==='result'){const blob=new Blob([JSON.stringify(m.data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='penpot-board.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);document.querySelector('#status').textContent='JSON 다운로드 완료';}});</script></html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Penpot PSD Exporter</title><style>
+body{font:13px system-ui,sans-serif;margin:0;padding:18px;color:#202124;background:#fff}
+h2{font-size:17px;margin:0 0 12px}p{line-height:1.6;color:#555}
+button{width:100%;padding:12px;border:0;border-radius:7px;background:#202124;color:#fff;font-weight:600;cursor:pointer}
+button:disabled{opacity:.55}select{padding:7px;border:1px solid #ccc;border-radius:5px}
+#status{white-space:pre-wrap;line-height:1.6;margin:12px 0;color:#333}
+small{display:block;margin-top:12px;line-height:1.5;color:#666}
+</style></head><body><h2>PSD Exporter — Experimental</h2>
+<p>Board 하나를 선택한 뒤 PSD로 내보내세요. 단색 사각형·원·텍스트·그룹을 우선 지원합니다.</p>
+<label>배율 <select id="scale"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option></select></label>
+<p><button id="export">Export editable PSD (beta)</button></p>
+<div id="status" role="status"></div>
+<small>이미지·그라디언트·복잡한 마스크 등은 현재 누락될 수 있습니다. 포토샵에서 실제 편집 가능 여부를 반드시 확인해 주세요.</small>
+<script type="module">
+import {exportEditablePsd} from "./converter.js";
+const button=document.querySelector("#export"),status=document.querySelector("#status");
+button.addEventListener("click",()=>{button.disabled=true;status.textContent="Penpot 프레임 정보 읽는 중…";parent.postMessage({type:"export"}, "*");});
+window.addEventListener("message",e=>{
+ const m=e.data;if(!m||!["result","error"].includes(m.type))return;
+ if(m.type==="error"){status.textContent=m.message;button.disabled=false;return;}
+ try{
+  status.textContent="PSD 변환 중…";
+  const result=exportEditablePsd(m.data,Number(document.querySelector("#scale").value));
+  const blob=new Blob([result.bytes],{type:"image/vnd.adobe.photoshop"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=(m.data.board.name||"board").replace(/[^\w가-힣-]/g,"_")+".psd";
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  status.textContent="PSD 생성 완료 (내부 파싱 검증)\n"+(result.warnings.length?"주의: "+result.warnings.join("; "):"단색 도형/텍스트 변환 시도 완료");
+ }catch(err){status.textContent="변환 실패: "+String(err.message||err);}
+ finally{button.disabled=false;}
+});
+</script></body></html>
